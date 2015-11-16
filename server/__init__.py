@@ -60,8 +60,10 @@ class Server:
     def deregister(self):
         json_dict = request.get_json()
         try:
-            self.db.delete_client(json_dict['ip'])
-            return self.success()
+            if self.db.delete_client(json_dict['ip']) != None:
+                return self.success()
+            else:
+                return self.bad_request()
         except Exception, e:
             print(traceback.print_exc())
             return self.bad_request()
