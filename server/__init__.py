@@ -6,6 +6,7 @@ from db.models import File, Client
 import db, json
 import traceback
 
+
 class Server:
 
     JSON_HEADER = {'Content-Type': 'application/json'}
@@ -48,8 +49,10 @@ class Server:
         json_dict = request.get_json()
         try:
             client = Client(json_dict)
-            self.db.add_client(client)
-            return self.success()
+            if self.db.add_client(client):
+                return self.success()
+            else:
+                return self.bad_request()
         except Exception, e:
             print(traceback.print_exc())
             return self.bad_request()
@@ -96,4 +99,3 @@ class Server:
         except Exception, e:
             print(traceback.print_exc())
             return self.bad_request()
-
