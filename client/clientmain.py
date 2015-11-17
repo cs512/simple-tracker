@@ -14,13 +14,13 @@ class clientmain:
 
     def run(self):
         stc = STClientInstance(
-            'http://'+self.local_ip+':'+self.trans_port,
+            'http://'+self.server_ip+':8000',
             self.local_folder_path,
-            self.server_ip)
+            'http://'+self.local_ip+':'+self.ctl_port
+        )
+        swd = SimpleWatchDog(self.local_folder_path, stc, self.local_ip)
 
-        swd = SimpleWatchDog(self.local_folder_path)
-
-        stc.register(self.server, self.ctl_port)
-        stc.update(self.server_ip)
+        stc.register(self.local_ip, self.ctl_port)
+        stc.update(self.local_ip)
 
         swd.start();
