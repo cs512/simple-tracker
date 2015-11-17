@@ -13,7 +13,6 @@ class Server:
 
     def __init__(self, ctl_port):
         self.web_app = Flask(__name__)
-        self.db = db.Database()
         self.ctl_port = ctl_port
         self.web_app.add_url_rule('/', 'index', self.index, methods=['GET', 'POST'])
         self.web_app.add_url_rule('/register', 'register', self.register, methods=['POST'])
@@ -21,6 +20,7 @@ class Server:
         self.web_app.add_url_rule('/update', 'update', self.update, methods=['POST'])
         self.web_app.add_url_rule('/transfer', 'transfer', self.transfer, methods=['POST'])
         self.web_app.add_url_rule('/file/<sha>', 'find_file', self.find_file, methods=['GET'])
+        self.web_app.add_url_rule('/heartbeat', 'heartbeat', self.heartbeat, methods=['POST'])
         self.web_app.register_error_handler(405, self.bad_method)
         self.db = db.Database()
 
@@ -30,8 +30,8 @@ class Server:
     def bad_method(self, error = None):
         return '{"status":"ERROR_METHOD_NOT_ALLOWED"}', 405, Server.JSON_HEADER
 
-    def bad_request(self, error = None):
-        return '{"status":"ERROR_BAD_REQUEST"}', 400, Server.JSON_HEADER
+    def bad_request(self, error = None, msg = ""):
+        return '{"status":"ERROR_BAD_REQUEST","msg":"' + msg + '"}', 400, Server.JSON_HEADER
 
     def forbidden(self, error = None):
         return '{"status":"ERROR_FORBIDDEN"}', 403, Server.JSON_HEADER
@@ -52,21 +52,21 @@ class Server:
             if self.db.add_client(client):
                 return self.success()
             else:
-                return self.bad_request()
+                return self.bad_request(msg="Client Exist")
         except Exception, e:
             print(traceback.print_exc())
-            return self.bad_request()
+            return self.bad_request(msg="JSON Error")
 
     def deregister(self):
         json_dict = request.get_json()
         try:
-            if self.db.delete_client(json_dict['ip']) != None:
+            if self.db.delete_client(json_dict['ip']):
                 return self.success()
             else:
-                return self.bad_request()
+                return self.bad_request(msg="Client Not Exist")
         except Exception, e:
             print(traceback.print_exc())
-            return self.bad_request()
+            return self.bad_request(msg="JSON Error")
 
     def update(self):
         json_dict = request.get_json()
@@ -77,11 +77,13 @@ class Server:
             for each_file in json_dict['files']:
                 file_obj = File(each_file)
                 files.append(file_obj)
-            self.db.update_files(client, files)
-            return self.success()
+            if self.db.update_files(client, files):
+                return self.success()
+            else:
+                return self.bad_request(msg="Client Not Exist")
         except Exception, e:
             print(traceback.print_exc())
-            return self.bad_request()
+            return self.bad_request(msg="JSON Error")
 
     def transfer(self):
         pass
@@ -100,4 +102,15 @@ class Server:
             return json.dumps(output), 200, Server.JSON_HEADER
         except Exception, e:
             print(traceback.print_exc())
-            return self.bad_request()
+            return self.bad_request(msg="JSON Error")
+
+    def heartbeat(self):
+        try:
+            json_dic = request.get_json()
+            if self.db.renew(json_dic['ip']):
+                return self.success()
+            else:
+                return self.bad_request(msg='Client Not Exist')
+        except Exception, e:
+            print(traceback.print_exc())
+            return self.bad_request(msg="JSON Error")
