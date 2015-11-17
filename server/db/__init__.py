@@ -91,7 +91,7 @@ class Database:
     def check_clients(self):
         while True:
             if not self.mutex.acquire(10):
-                return
+                continue
             time_now = time.time()
             for each_ip in self.client_table:
                 if time_now - self.client_table[each_ip]['time'] > 600:
