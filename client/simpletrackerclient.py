@@ -55,14 +55,14 @@ class STClientInstance(object):
         json_data = json.dumps(data)
         print(json_data)
         response = self.delete(endpoint=self.server+endpoint,
-                             data=json_data)
+                               data=json_data)
         self.parse_response(response.text)
 
     def update(self, ip):
         endpoint = "/update"
         data = {
             "ip": ip,
-            "files": folderinfo.getfolderinfo(self.folderpath, self.root_uri)
+            "files": folderinfo.getfolderinfo(self.folderpath, self.root_uri, self.folderpath)
         }
         json_data = json.dumps(data)
         print(json_data)

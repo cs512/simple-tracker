@@ -7,19 +7,51 @@ import logging
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 
-class simplewatchdog():
+need_update = False
 
-    def __init__(self, folderpath):
+
+class SimpleEventHandler(LoggingEventHandler):
+    """Logs all the events captured."""
+
+    def on_moved(self, event):
+        global need_update
+        need_update = True
+
+    def on_created(self, event):
+        global need_update
+        need_update = True
+
+    def on_deleted(self, event):
+        global need_update
+        need_update = True
+
+    def on_modified(self, event):
+        global need_update
+        need_update = True
+
+
+class SimpleWatchDog:
+
+    def __init__(self, folderpath, STClientInstance, local_ip):
         self.folderpath = folderpath
-
-    def start(self): 
-        logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s - %(message)s',
-                            datefmt='%Y-%m-%d %H:%M:%S')
-        event_handler = LoggingEventHandler()
         self.observer = Observer()
+        self.stc = STClientInstance
+        self.local_ip = local_ip
+
+    def start(self):
+        global need_update
+        event_handler = SimpleEventHandler()
         self.observer.schedule(event_handler, self.folderpath, recursive=True)
         self.observer.start()
+
+        while True:
+            time.sleep(10)
+            print(need_update)
+            if need_update:
+                print("update")
+                self.stc.update(self.local_ip)
+                need_update = False
+
         try:
             while True:
                 time.sleep(1)

@@ -4,7 +4,7 @@ import hashlib
 
 folder_info = []
 
-def getfolderinfo(folder, root_uri):
+def getfolderinfo(folder, root_uri, folder_ROOT):
 
     if not os.path.exists(folder):
         print("Path does not exist!")
@@ -20,9 +20,13 @@ def getfolderinfo(folder, root_uri):
         if os.path.isfile(itempath):
             file_sha = hashfile(itempath)
             file_size = os.path.getsize(itempath)
-            folder_info.append({"sha":file_sha, "size":file_size, "uri":root_uri+itempath});
+            folder_info.append(
+                {
+                    "sha": file_sha,
+                    "size": file_size,
+                    "uri": root_uri+itempath[len(folder_ROOT):]})
         elif os.path.isdir(itempath):
-            getfolderinfo(itempath, root_uri)
+            getfolderinfo(itempath, root_uri, folder_ROOT)
     return folder_info
 
 
