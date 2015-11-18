@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
-
-import sys
 import time
-import logging
 from watchdog.observers import Observer
 from watchdog.events import LoggingEventHandler
 
@@ -46,11 +43,12 @@ class SimpleWatchDog:
 
         while True:
             time.sleep(10)
-            print(need_update)
+            #print(need_update)
             if need_update:
-                print("update")
+                print("the folder needs update")
                 self.stc.update(self.local_ip)
                 need_update = False
+                print("the folder had updated")
 
         try:
             while True:

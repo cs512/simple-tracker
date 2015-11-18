@@ -53,7 +53,7 @@ class STClientInstance(object):
             "ip": ip
         }
         json_data = json.dumps(data)
-        print(json_data)
+        #print(json_data)
         response = self.delete(endpoint=self.server+endpoint,
                                data=json_data)
         self.parse_response(response.text)
@@ -65,7 +65,7 @@ class STClientInstance(object):
             "files": folderinfo.getfolderinfo(self.folderpath, self.root_uri, self.folderpath)
         }
         json_data = json.dumps(data)
-        print(json_data)
+        #print(json_data)
         response = self.post(endpoint=self.server+endpoint,
                              data=json_data)
         self.parse_response(response.text)
